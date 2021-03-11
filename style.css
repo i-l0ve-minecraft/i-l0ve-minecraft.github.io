@@ -1,12 +1,12 @@
 h1
 {
 	color:#ff0000;
-	background-color:#ffff00;
+	background-color:#FFFF00;
 }
 
 .layer1 {
     float: left; /* Обтекание по правому краю */
-    background: #00FF00; /* Цвет фона */
+    background: #0000FF; /* Цвет фона */
     border: 1px solid black; /* Параметры рамки */
     padding: 10px; /* Поля вокруг текста */
     margin-right: 20px; /* Отступ справа */
