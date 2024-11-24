@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <?php
   /* Принимаем данные из формы */
   $name = $_POST["name"];
