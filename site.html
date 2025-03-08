@@ -151,6 +151,10 @@
             const storedUsers = localStorage.getItem('registeredUsers');
             if (storedUsers) {
                 registeredUsers = JSON.parse(storedUsers); // Восстанавливаем пользователей из localStorage
+            } else {
+                // Создаем аккаунт по умолчанию, если нет зарегистрированных пользователей
+                registeredUsers['test'] = { password: 'password123', coins: 10 }; // Создаем аккаунт test с 10 монетами
+                saveUsersToLocalStorage(); // Сохраняем пользователей в localStorage
             }
             const storedUser = localStorage.getItem('currentUser');
             if (storedUser && registeredUsers[storedUser]) {
