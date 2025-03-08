@@ -1,76 +1,147 @@
 <!DOCTYPE html>
-<html>
- <head>
-  <meta charset="utf-8">
-  <title>Мой сайт</title> <!-- заголовок сайта -->
-  <style>
-   .layer1 {
-    float: left; /* Обтекание по правому краю */
-    background: #1aff1a; /* Цвет фона */
-    border: 10px solid #00b7ff; /* Параметры рамки */
-    padding: 10px; /* Поля вокруг текста */
-    margin-right: 20px; /* Отступ справа */
-    width: 40%; /* Ширина блока */
-   }
-  </style>
-  
-    <link rel="stylesheet" href="style.css" type="text/css">
-  
-  </head> 
- 
- <body> 
-<center><h1>Привет</h2>
-<div class="layer1">
-<h1>вот некоторые из моих любимых сайтов</h2>
-<a href="https://scratch.mit.edu/">Scrath</a>
-<a href="https://yandex.ru/games/">игры онлайн</a>
-<a href="https://minecraft-inside.ru/seeds/">сиды для Minekraft</a>
- 
-<h1>Вот мои проекты!</h2>
-<ol>
-<li><a href="https://scratch.mit.edu/projects/464849534/">Танчики</a></li>
-<li><a href="https://scratch.mit.edu/projects/469732831">Комар</a></li>
-</ol>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Игровой Счет</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        #account { margin-top: 20px; }
+        #adminMenu { display: none; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <h1>Добро пожаловать в Игровой Счет</h1>
+    <div id="welcome">
+        <h2>Выберите действие</h2>
+        <button onclick="showRegistration()">Зарегистрироваться</button>
+        <button onclick="showLogin()">Войти</button>
+        <button onclick="showAdminLogin()">Вход в админку</button>
+    </div>
+    <div id="registration" style="display:none;">
+        <h2>Регистрация</h2>
+        <input type="text" id="username" placeholder="Введите имя пользователя">
+        <input type="password" id="password" placeholder="Придумайте пароль">
+        <button onclick="createAccount()">Создать счет</button>
+        <button onclick="showLogin()">Уже есть аккаунт? Войти</button>
+    </div>
+    <div id="login" style="display:none;">
+        <h2>Вход</h2>
+        <input type="text" id="loginUsername" placeholder="Введите имя пользователя">
+        <input type="password" id="loginPassword" placeholder="Введите пароль">
+        <button onclick="login()">Войти</button>
+        <button onclick="showRegistration()">Нет аккаунта? Зарегистрироваться</button>
+    </div>
+    <div id="adminLogin" style="display:none;">
+        <h2>Вход в админку</h2>
+        <input type="password" id="adminPassword" placeholder="Введите пароль администратора">
+        <button onclick="adminLogin()">Войти</button>
+    </div>
+    <div id="account" style="display:none;">
+        <h2>Ваш счет</h2>
+        <p>Игровые монеты: <span id="coins">0</span></p>
+    </div>
+    <div id="adminMenu" style="display:none;">
+        <h2>Меню администратора</h2>
+        <p>Здесь вы можете управлять сайтами.</p>
+        <h3>Счета пользователей</h3>
+        <div id="userAccounts"></div>
+    </div>
 
-<h1>I love Minecraft!</h2>
-</div>
- <h1>игры онлайн</h1>
- 
-<iframe src="https://scratch.mit.edu/projects/464849534/embed" allowtransparency="true" width="485" height="402" frameborder="0" scrolling="no" allowfullscreen></iframe>
-<iframe src="https://scratch.mit.edu/projects/498661227/embed" allowtransparency="true" width="485" height="402" frameborder="0" scrolling="no" allowfullscreen></iframe>
+    <script>
+        let coins = 0;
+        let registeredUsers = {}; // Объект для хранения пользователей и их монет
+        let currentUser = null;
 
-<iframe src="https://scratch.mit.edu/projects/469732831/embed" allowtransparency="true" width="485" height="402" frameborder="0" scrolling="no" allowfullscreen></iframe>
+        function showRegistration() {
+            document.getElementById('welcome').style.display = 'none';
+            document.getElementById('registration').style.display = 'block';
+        }
 
- <h1>я играю в майнкрафт</h1>
- <h2>вот некоторые сиды:</h2>
- <h3>версия 1.21.0</h3>
- <h3>5910974657933364 </h3>
- <p>мой ник Il0veminecraft</p>
- <p>ещё я играю в Roblox, Fortnite, Castle Story, Subnautica, Team fortress 2, Age of sea, Deep rock galaktick, Planet crafter, Stradew walley, Robocraft, Mars horison, spase ingeneers.</p>
-<form name="comment" action="comment.php" method="post">
-  <p>
-    <label>Имя:</label>
-    <input type="text" name="name" />
-  </p>
-  <p>
-    <label>Комментарий:</label>
-    <br />
-    <textarea name="text_comment" cols="30" rows="50"></textarea>
-  </p>
-  <p>
-    <input type="hidden" name="page_id" value="150" />
-    <input type="submit" value="Отправить" />
-  </p>
-</form>
- <?php
-  $page_id = 150;// Уникальный идентификатор страницы (статьи или поста)
-  $mysqli = new mysqli("localhost", "root", "", "db");// Подключается к базе данных
-  $result_set = $mysqli->query("SELECT * FROM `comments` WHERE `page_id`='$page_id'"); //Вытаскиваем все комментарии для данной страницы
-  while ($row = $result_set->fetch_assoc()) {
-    print_r($row); //Вывод комментариев
-    echo "<br />";
-  }
-?>
+        function showLogin() {
+            document.getElementById('welcome').style.display = 'none';
+            document.getElementById('login').style.display = 'block';
+        }
+
+        function showAdminLogin() {
+            document.getElementById('welcome').style.display = 'none';
+            document.getElementById('adminLogin').style.display = 'block';
+        }
+
+        function createAccount() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            if (username && password) {
+                registeredUsers[username] = { password: password, coins: 0 }; // Сохраняем пользователя
+                alert('Счет создан! Ваше имя пользователя: ' + username + ', Ваш пароль: ' + password);
+                document.getElementById('registration').style.display = 'none';
+                document.getElementById('login').style.display = 'block';
+            } else {
+                alert('Пожалуйста, введите имя пользователя и пароль.');
+            }
+        }
+
+        function login() {
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+            if (registeredUsers[username] && registeredUsers[username].password === password) {
+                currentUser = username; // Сохраняем текущего пользователя
+                alert('Вы вошли в систему! Ваше имя пользователя: ' + username);
+                document.getElementById('login').style.display = 'none';
+                document.getElementById('account').style.display = 'block';
+                updateCoins();
+            } else {
+                alert('Неверное имя пользователя или пароль.');
+            }
+        }
+
+        function adminLogin() {
+            const adminPassword = document.getElementById('adminPassword').value;
+            if (adminPassword === '78963214') {
+                alert('Вы вошли в админку!');
+                document.getElementById('adminLogin').style.display = 'none';
+                document.getElementById('adminMenu').style.display = 'block';
+                displayUserAccounts(); // Отображаем счета пользователей
+            } else {
+                alert('Неверный пароль администратора.');
+            }
+        }
+
+        function displayUserAccounts() {
+            const userAccountsDiv = document.getElementById('userAccounts');
+            userAccountsDiv.innerHTML = ''; // Очищаем предыдущие данные
+            for (const username in registeredUsers) {
+                const user = registeredUsers[username];
+                userAccountsDiv.innerHTML += `
+                    <div>
+                        <p>${username}: <span id="coins-${username}">${user.coins}</span> монет</p>
+                        <input type="number" id="change-${username}" placeholder="Изменить монеты">
+                        <button onclick="changeCoins('${username}')">Изменить</button>
+                    </div>
+                `;
+            }
+        }
+
+        function changeCoins(username) {
+            const changeInput = document.getElementById(`change-${username}`);
+            const newCoins = parseInt(changeInput.value);
+            if (!isNaN(newCoins)) {
+                registeredUsers[username].coins = newCoins; // Обновляем количество монет
+                document.getElementById(`coins-${username}`).innerText = newCoins; // Обновляем отображение
+                alert(`Количество монет для ${username} изменено на ${newCoins}.`);
+            } else {
+                alert('Пожалуйста, введите корректное число.');
+            }
+        }
+
+        function updateCoins() {
+            if (currentUser) {
+                document.getElementById('coins').innerText = registeredUsers[currentUser].coins;
+            }
+        }
+    </script>
+</body>
+</html>
 
 
 
