@@ -73,6 +73,7 @@
             const password = document.getElementById('password').value;
             if (username && password) {
                 registeredUsers[username] = { password: password, coins: 0 }; // Сохраняем пользователя
+                saveUsersToLocalStorage(); // Сохраняем пользователей в localStorage
                 alert('Счет создан! Ваше имя пользователя: ' + username + ', Ваш пароль: ' + password);
                 document.getElementById('registration').style.display = 'none';
                 document.getElementById('login').style.display = 'block';
@@ -86,6 +87,7 @@
             const password = document.getElementById('loginPassword').value;
             if (registeredUsers[username] && registeredUsers[username].password === password) {
                 currentUser = username; // Сохраняем текущего пользователя
+                localStorage.setItem('currentUser', username); // Сохраняем текущего пользователя в localStorage
                 alert('Вы вошли в систему! Ваше имя пользователя: ' + username);
                 document.getElementById('login').style.display = 'none';
                 document.getElementById('account').style.display = 'block';
@@ -127,6 +129,7 @@
             const newCoins = parseInt(changeInput.value);
             if (!isNaN(newCoins)) {
                 registeredUsers[username].coins = newCoins; // Обновляем количество монет
+                saveUsersToLocalStorage(); // Сохраняем обновленные данные в localStorage
                 document.getElementById(`coins-${username}`).innerText = newCoins; // Обновляем отображение
                 alert(`Количество монет для ${username} изменено на ${newCoins}.`);
             } else {
@@ -134,19 +137,31 @@
             }
         }
 
+        function saveUsersToLocalStorage() {
+            localStorage.setItem('registeredUsers', JSON.stringify(registeredUsers)); // Сохраняем пользователей в localStorage
+        }
+
         function updateCoins() {
             if (currentUser) {
                 document.getElementById('coins').innerText = registeredUsers[currentUser].coins;
             }
         }
+
+        function checkLoginStatus() {
+            const storedUsers = localStorage.getItem('registeredUsers');
+            if (storedUsers) {
+                registeredUsers = JSON.parse(storedUsers); // Восстанавливаем пользователей из localStorage
+            }
+            const storedUser = localStorage.getItem('currentUser');
+            if (storedUser && registeredUsers[storedUser]) {
+                currentUser = storedUser; // Восстанавливаем текущего пользователя
+                document.getElementById('welcome').style.display = 'none';
+                document.getElementById('account').style.display = 'block';
+                updateCoins();
+            }
+        }
+
+        window.onload = checkLoginStatus; // Проверяем статус входа при загрузке страницы
     </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
