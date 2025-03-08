@@ -121,6 +121,9 @@
                         <p>${username}: <span id="coins-${username}">${user.coins}</span> монет</p>
                         <input type="number" id="change-${username}" placeholder="Изменить монеты">
                         <button onclick="changeCoins('${username}')">Изменить</button>
+                        <input type="password" id="newPassword-${username}" placeholder="Новый пароль">
+                        <button onclick="changePassword('${username}')">Сменить пароль</button>
+                        <button onclick="deleteAccount('${username}')">Удалить аккаунт</button>
                     </div>
                 `;
             }
@@ -136,6 +139,28 @@
                 alert(`Количество монет для ${username} изменено на ${newCoins}.`);
             } else {
                 alert('Пожалуйста, введите корректное число.');
+            }
+        }
+
+        function changePassword(username) {
+            const newPasswordInput = document.getElementById(`newPassword-${username}`);
+            const newPassword = newPasswordInput.value;
+            if (newPassword) {
+                registeredUsers[username].password = newPassword; // Обновляем пароль
+                saveUsersToLocalStorage(); // Сохраняем обновленные данные в localStorage
+                alert(`Пароль для ${username} изменен.`);
+                newPasswordInput.value = ''; // Очищаем поле ввода
+            } else {
+                alert('Пожалуйста, введите новый пароль.');
+            }
+        }
+
+        function deleteAccount(username) {
+            if (confirm(`Вы уверены, что хотите удалить аккаунт ${username}?`)) {
+                delete registeredUsers[username]; // Удаляем пользователя
+                saveUsersToLocalStorage(); // Сохраняем обновленные данные в localStorage
+                displayUserAccounts(); // Обновляем отображение счетов
+                alert(`Аккаунт ${username} удален.`);
             }
         }
 
