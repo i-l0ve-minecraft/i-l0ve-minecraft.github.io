@@ -39,7 +39,9 @@
     </div>
     <div id="account" style="display:none;">
         <h2>Ваш счет</h2>
+        <p>Имя пользователя: <span id="currentUsername"></span></p>
         <p>Игровые монеты: <span id="coins">0</span></p>
+        <button onclick="logout()">Выйти</button>
     </div>
     <div id="adminMenu" style="display:none;">
         <h2>Меню администратора</h2>
@@ -144,7 +146,15 @@
         function updateCoins() {
             if (currentUser) {
                 document.getElementById('coins').innerText = registeredUsers[currentUser].coins;
+                document.getElementById('currentUsername').innerText = currentUser;
             }
+        }
+
+        function logout() {
+            currentUser = null;
+            localStorage.removeItem('currentUser');
+            document.getElementById('account').style.display = 'none';
+            document.getElementById('welcome').style.display = 'block';
         }
 
         function checkLoginStatus() {
