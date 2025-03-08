@@ -90,7 +90,7 @@
             'user2': { password: 'password2', coins: 20 },
             'user3': { password: 'password3', coins: 30 },
         };
-        let currentUser = null;
+        let currentUser = "currentUsername";
         let notes = [];
         let events = [];
         let chatMessages = [
@@ -125,7 +125,7 @@
             const messageText = chatMessageInput.value;
 
             if (messageText) {
-                const newMessage = { username: 'currentUser', message: messageText };
+                const newMessage = { username: currentUser, message: messageText };
                 chatMessages.push(newMessage);
                 displayChatMessages();
                 chatMessageInput.value = '';
@@ -194,7 +194,14 @@
             for (const username in registeredUsers) {
                 const user = registeredUsers[username];
                 const userDiv = document.createElement('div');
-                userDiv.innerHTML = `Пользователь: ${username}, Монеты: ${user.coins}`;
+                userDiv.innerHTML = `
+                    Пользователь: ${username}, Монеты: <span id="coins-${username}">${user.coins}</span>
+                    <input type="number" id="change-${username}" placeholder="Изменить монеты" min="0">
+                    <button onclick="changeCoins('${username}')">Изменить</button>
+                    <input type="password" id="newPassword-${username}" placeholder="Новый пароль">
+                    <button onclick="changePassword('${username}')">Изменить пароль</button>
+                    <button onclick="deleteAccount('${username}')">Удалить аккаунт</button>
+                `;
                 userAccountsDiv.appendChild(userDiv);
             }
         }
@@ -207,6 +214,7 @@
                 saveUsersToLocalStorage();
                 document.getElementById(`coins-${username}`).innerText = newCoins;
                 alert(`Количество монет для ${username} изменено на ${newCoins}.`);
+                displayUserAccounts();
             } else {
                 alert('Пожалуйста, введите корректное число.');
             }
@@ -220,6 +228,7 @@
                 saveUsersToLocalStorage();
                 alert(`Пароль для ${username} изменен.`);
                 newPasswordInput.value = '';
+                displayUserAccounts();
             } else {
                 alert('Пожалуйста, введите новый пароль.');
             }
