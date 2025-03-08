@@ -4,11 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Игровой Счет</title>
-    <style>
-        body { font-family: Arial, sans-serif; }
-        #account { margin-top: 20px; }
-        #adminMenu { display: none; margin-top: 20px; }
-    </style>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
     <h1>Добро пожаловать в Игровой Счет</h1>
@@ -17,6 +14,7 @@
         <button onclick="showRegistration()">Зарегистрироваться</button>
         <button onclick="showLogin()">Войти</button>
         <button onclick="showAdminLogin()">Вход в админку</button>
+        <button onclick="showNotes()">Просмотреть заметки</button>
     </div>
     <div id="registration" style="display:none;">
         <h2>Регистрация</h2>
@@ -38,20 +36,68 @@
         <button onclick="adminLogin()">Войти</button>
     </div>
     <div id="account" style="display:none;">
-        <h2>Ваш счет</h2>
-        <p>Игровые монеты: <span id="coins">0</span></p>
+        <h2>Ваш счет <i class="fas fa-user-circle"></i></h2>
+        <div id="userInfo">
+            Имя пользователя: <span id="currentUsername"></span>
+        </div>
+        <div id="userCoins" style="font-size: 1.5em; color: #FFD700;">
+            Игровые монеты: <span id="coins">0</span> &#x1F4B0;
+        </div>
+        <div id="chatSection">
+            <h3>Чат <i class="fas fa-comments"></i></h3>
+            <div id="messages"></div>
+            <input type="text" id="chatMessage" placeholder="Введите сообщение">
+            <button onclick="sendMessage()">Отправить <i class="fas fa-paper-plane"></i></button>
+        </div>
+        <div id="eventsDisplay">
+            <h3>События <i class="fas fa-calendar-alt"></i></h3>
+            <div id="eventsList"></div>
+            <input type="text" id="eventContent" placeholder="Введите текст события">
+            <input type="datetime-local" id="eventDateTime" placeholder="Выберите дату и время">
+            <button onclick="addEvent()">Добавить событие <i class="fas fa-plus-circle"></i></button>
+        </div>
+        <button onclick="logout()">Выйти <i class="fas fa-sign-out-alt"></i></button>
     </div>
     <div id="adminMenu" style="display:none;">
         <h2>Меню администратора</h2>
         <p>Здесь вы можете управлять сайтами.</p>
         <h3>Счета пользователей</h3>
         <div id="userAccounts"></div>
+        <h3>Заметки</h3>
+        <div id="notesMenu">
+            <input type="text" id="noteContent" placeholder="Введите текст заметки">
+            <button onclick="addNote()">Добавить заметку</button>
+            <div id="notesList"></div>
+        </div>
+        <h3>События</h3>
+        <div id="eventsMenu">
+            <input type="text" id="eventContent" placeholder="Введите текст события">
+            <input type="datetime-local" id="eventDateTime" placeholder="Выберите дату и время">
+            <button onclick="addEvent()">Добавить событие</button>
+            <div id="eventsList"></div>
+        </div>
+        <button onclick="clearChat()">Очистить чат</button>
+    </div>
+    <div id="notesSection" style="display:none;">
+        <h2>Заметки</h2>
+        <div id="notesList"></div>
     </div>
 
     <script>
         let coins = 0;
-        let registeredUsers = {}; // Объект для хранения пользователей и их монет
-        let currentUser = null;
+        let registeredUsers = {
+            'user1': { password: 'password1', coins: 10 },
+            'user2': { password: 'password2', coins: 20 },
+            'user3': { password: 'password3', coins: 30 },
+        };
+        let currentUser = 'user1';
+        let notes = [];
+        let events = [];
+        let chatMessages = [
+            { username: 'user1', message: 'Привет всем!' },
+            { username: 'user2', message: 'Как дела?' },
+            { username: 'user3', message: 'Все отлично, спасибо!' },
+        ];
 
         function showRegistration() {
             document.getElementById('welcome').style.display = 'none';
@@ -68,12 +114,49 @@
             document.getElementById('adminLogin').style.display = 'block';
         }
 
+        function showNotes() {
+            document.getElementById('welcome').style.display = 'none';
+            document.getElementById('notesSection').style.display = 'block';
+            displayNotes();
+        }
+
+        function loadChatMessages() {
+            const storedMessages = localStorage.getItem('chatMessages');
+            if (storedMessages) {
+                chatMessages = JSON.parse(storedMessages);
+            }
+        }
+
+        function displayChatMessages() {
+            const messagesDiv = document.getElementById('messages');
+            messagesDiv.innerHTML = '';
+
+            chatMessages.forEach(msg => {
+                const messageDiv = document.createElement('div');
+                messageDiv.innerHTML = `<strong>${msg.username}:</strong> ${msg.message}`;
+                messagesDiv.appendChild(messageDiv);
+            });
+        }
+
+        function sendMessage() {
+            const chatMessageInput = document.getElementById('chatMessage');
+            const messageText = chatMessageInput.value;
+
+            if (messageText) {
+                const newMessage = { username: currentUser, message: messageText };
+                chatMessages.push(newMessage);
+                localStorage.setItem('chatMessages', JSON.stringify(chatMessages));
+                displayChatMessages();
+                chatMessageInput.value = '';
+            }
+        }
+
         function createAccount() {
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
             if (username && password) {
-                registeredUsers[username] = { password: password, coins: 0 }; // Сохраняем пользователя
-                saveUsersToLocalStorage(); // Сохраняем пользователей в localStorage
+                registeredUsers[username] = { password: password, coins: 0 };
+                saveUsersToLocalStorage();
                 alert('Счет создан! Ваше имя пользователя: ' + username + ', Ваш пароль: ' + password);
                 document.getElementById('registration').style.display = 'none';
                 document.getElementById('login').style.display = 'block';
@@ -86,12 +169,14 @@
             const username = document.getElementById('loginUsername').value;
             const password = document.getElementById('loginPassword').value;
             if (registeredUsers[username] && registeredUsers[username].password === password) {
-                currentUser = username; // Сохраняем текущего пользователя
-                localStorage.setItem('currentUser', username); // Сохраняем текущего пользователя в localStorage
+                currentUser = username;
+                localStorage.setItem('currentUser', username);
                 alert('Вы вошли в систему! Ваше имя пользователя: ' + username);
                 document.getElementById('login').style.display = 'none';
                 document.getElementById('account').style.display = 'block';
                 updateCoins();
+                displayChatMessages();
+                displayEvents();
             } else {
                 alert('Неверное имя пользователя или пароль.');
             }
@@ -103,7 +188,9 @@
                 alert('Вы вошли в админку!');
                 document.getElementById('adminLogin').style.display = 'none';
                 document.getElementById('adminMenu').style.display = 'block';
-                displayUserAccounts(); // Отображаем счета пользователей
+                displayUserAccounts();
+                displayNotes();
+                displayEvents();
             } else {
                 alert('Неверный пароль администратора.');
             }
@@ -111,16 +198,19 @@
 
         function displayUserAccounts() {
             const userAccountsDiv = document.getElementById('userAccounts');
-            userAccountsDiv.innerHTML = ''; // Очищаем предыдущие данные
+            userAccountsDiv.innerHTML = '';
             for (const username in registeredUsers) {
                 const user = registeredUsers[username];
-                userAccountsDiv.innerHTML += `
-                    <div>
-                        <p>${username}: <span id="coins-${username}">${user.coins}</span> монет</p>
-                        <input type="number" id="change-${username}" placeholder="Изменить монеты">
-                        <button onclick="changeCoins('${username}')">Изменить</button>
-                    </div>
+                const userDiv = document.createElement('div');
+                userDiv.innerHTML = `
+                    Пользователь: ${username}, Монеты: <span id="coins-${username}">${user.coins}</span>
+                    <input type="number" id="change-${username}" placeholder="Изменить монеты" min="0">
+                    <button onclick="changeCoins('${username}')">Изменить</button>
+                    <input type="password" id="newPassword-${username}" placeholder="Новый пароль">
+                    <button onclick="changePassword('${username}')">Изменить пароль</button>
+                    <button onclick="deleteAccount('${username}')">Удалить аккаунт</button>
                 `;
+                userAccountsDiv.appendChild(userDiv);
             }
         }
 
@@ -128,44 +218,156 @@
             const changeInput = document.getElementById(`change-${username}`);
             const newCoins = parseInt(changeInput.value);
             if (!isNaN(newCoins)) {
-                registeredUsers[username].coins = newCoins; // Обновляем количество монет
-                saveUsersToLocalStorage(); // Сохраняем обновленные данные в localStorage
-                document.getElementById(`coins-${username}`).innerText = newCoins; // Обновляем отображение
+                registeredUsers[username].coins = newCoins;
+                saveUsersToLocalStorage();
+                document.getElementById(`coins-${username}`).innerText = newCoins;
                 alert(`Количество монет для ${username} изменено на ${newCoins}.`);
+                displayUserAccounts();
             } else {
                 alert('Пожалуйста, введите корректное число.');
             }
         }
 
+        function changePassword(username) {
+            const newPasswordInput = document.getElementById(`newPassword-${username}`);
+            const newPassword = newPasswordInput.value;
+            if (newPassword) {
+                registeredUsers[username].password = newPassword;
+                saveUsersToLocalStorage();
+                alert(`Пароль для ${username} изменен.`);
+                newPasswordInput.value = '';
+                displayUserAccounts();
+            } else {
+                alert('Пожалуйста, введите новый пароль.');
+            }
+        }
+
+        function deleteAccount(username) {
+            if (confirm(`Вы уверены, что хотите удалить аккаунт ${username}?`)) {
+                delete registeredUsers[username];
+                saveUsersToLocalStorage();
+                displayUserAccounts();
+                alert(`Аккаунт ${username} удален.`);
+            }
+        }
+
         function saveUsersToLocalStorage() {
-            localStorage.setItem('registeredUsers', JSON.stringify(registeredUsers)); // Сохраняем пользователей в localStorage
+            localStorage.setItem('registeredUsers', JSON.stringify(registeredUsers));
         }
 
         function updateCoins() {
             if (currentUser) {
                 document.getElementById('coins').innerText = registeredUsers[currentUser].coins;
+                document.getElementById('currentUsername').innerText = currentUser;
             }
+        }
+
+        function logout() {
+            currentUser = null;
+            localStorage.removeItem('currentUser');
+            document.getElementById('account').style.display = 'none';
+            document.getElementById('welcome').style.display = 'block';
         }
 
         function checkLoginStatus() {
             const storedUsers = localStorage.getItem('registeredUsers');
             if (storedUsers) {
-                registeredUsers = JSON.parse(storedUsers); // Восстанавливаем пользователей из localStorage
+                registeredUsers = JSON.parse(storedUsers);
             } else {
-                // Создаем аккаунт по умолчанию, если нет зарегистрированных пользователей
-                registeredUsers['test'] = { password: 'password123', coins: 10 }; // Создаем аккаунт test с 10 монетами
-                saveUsersToLocalStorage(); // Сохраняем пользователей в localStorage
+                registeredUsers['test'] = { password: 'password123', coins: 10 };
+                saveUsersToLocalStorage();
             }
             const storedUser = localStorage.getItem('currentUser');
             if (storedUser && registeredUsers[storedUser]) {
-                currentUser = storedUser; // Восстанавливаем текущего пользователя
+                currentUser = storedUser;
                 document.getElementById('welcome').style.display = 'none';
                 document.getElementById('account').style.display = 'block';
                 updateCoins();
+                displayChatMessages();
+                displayEvents();
             }
         }
 
-        window.onload = checkLoginStatus; // Проверяем статус входа при загрузке страницы
+        function displayNotes() {
+            const notesList = document.getElementById('notesList');
+            notesList.innerHTML = '';
+            notes.forEach((note, index) => {
+                notesList.innerHTML += `
+                    <div>
+                        <p>${note}</p>
+                        <button onclick="deleteNote(${index})">Удалить заметку</button>
+                    </div>
+                `;
+            });
+        }
+
+        function deleteNote(index) {
+            if (confirm('Вы уверены, что хотите удалить эту заметку?')) {
+                notes.splice(index, 1);
+                saveNotesToLocalStorage();
+                displayNotes();
+            }
+        }
+
+        function saveNotesToLocalStorage() {
+            localStorage.setItem('notes', JSON.stringify(notes));
+        }
+
+        function displayEvents() {
+            const eventsDisplay = document.getElementById('eventsList');
+            eventsDisplay.innerHTML = '';
+            events.forEach((event, index) => {
+                eventsDisplay.innerHTML += `
+                    <div>
+                        <p>${event.content} - ${new Date(event.dateTime).toLocaleString()}</p>
+                        <button onclick="deleteEvent(${index})">Удалить событие</button>
+                    </div>
+                `;
+            });
+        }
+
+        function addEvent() {
+            const eventContent = document.getElementById('eventContent').value;
+            const eventDateTime = document.getElementById('eventDateTime').value;
+            if (eventContent && eventDateTime) {
+                events.push({ content: eventContent, dateTime: eventDateTime });
+                saveEventsToLocalStorage();
+                document.getElementById('eventContent').value = '';
+                document.getElementById('eventDateTime').value = '';
+                displayEvents();
+            } else {
+                alert('Пожалуйста, введите текст события и выберите дату и время.');
+            }
+        }
+
+        function deleteEvent(index) {
+            if (confirm('Вы уверены, что хотите удалить это событие?')) {
+                events.splice(index, 1);
+                saveEventsToLocalStorage();
+                displayEvents();
+            }
+        }
+
+        function saveEventsToLocalStorage() {
+            localStorage.setItem('events', JSON.stringify(events));
+        }
+
+        function clearChat() {
+            chatMessages = [];
+            localStorage.removeItem('chatMessages');
+            displayChatMessages();
+        }
+
+        window.onload = function() {
+            checkLoginStatus();
+            loadNotesFromLocalStorage();
+            loadEventsFromLocalStorage();
+            displayNotes();
+            displayEvents();
+            displayUserAccounts();
+            loadChatMessages();
+            displayChatMessages();
+        };
     </script>
 </body>
 </html>
